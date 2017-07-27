@@ -1,0 +1,80 @@
+{
+  "AWSEBDockerrunVersion": 2,
+  "volumes": [
+    {
+      "name": "drone",
+      "host": {
+        "sourcePath": "/var/lib/drone"
+      }
+    },
+    {
+      "name": "docker-sock",
+      "host": {
+        "sourcePath": "/var/run/docker.sock"
+      }
+    },
+    {
+      "name": "nginx-proxy-conf",
+      "host": {
+        "sourcePath": "/var/app/current/proxy/conf.d"
+      }
+    }
+  ],
+  "containerDefinitions": [
+    {
+      "name": "drone-server",
+      "image": "drone/drone:0.7",
+      "essential": true,
+      "memory": 128,
+      "portMappings": [
+        {
+          "hostPort": 80,
+          "containerPort": 8000
+        }
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "drone",
+          "containerPath": "/var/lib/drone"
+        }
+      ]
+    },
+    {
+      "name": "drone-agent",
+      "image": "drone/drone:0.7",
+      "essential": true,
+      "memory": 128,
+      "links": [
+        "drone-server"
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "docker-sock",
+          "containerPath": "/var/run/docker.sock"
+        }
+      ]
+    },
+    {
+      "name": "nginx-proxy",
+      "image": "nginx",
+      "essential": true,
+      "memory": 128,
+      "portMappings": [
+        {
+          "hostPort": 80,
+          "containerPort": 80
+        }
+      ],
+      "links": [
+        "php-app"
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "nginx-proxy-conf",
+          "containerPath": "/etc/nginx/conf.d",
+          "readOnly": true
+        }
+      ]
+    }
+  ]
+}
