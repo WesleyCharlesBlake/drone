@@ -1,2 +1,2 @@
 # drone
-Drone CI/CD for Realkey
+drone CI instance deployed with ElasticBeanstalk (ECS service)
